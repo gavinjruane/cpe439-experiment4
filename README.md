@@ -19,15 +19,17 @@ My demonstration video is available on [YouTube](...) (if you would like to revi
 
 4. Briefly describe how event groups can be configured to use either OR or AND functions when waiting for event flags to be set in the event register.
 
-	Using **OR** with an event group
+	Using an **AND** operation with an event group means that all bits specified in the `uxBitsToWaitFor` field must be set before the function will return and unblock. Using an **OR** operation with an event group means that at least one bit must be set for the function to unblock, but not all bits are necessary.
 
-5. Briefly describe how tasks waiting on certain event groups specify which event groups they are waiting for.
+	As an example, consider the wait bits `0b0011`. If we were using an **AND** operation, we would need `0b0011` to be satisfied before the function would unblock. If we were using an **OR** operation, we would only need at least `0b0001` or `0b0010` to be set before continuing. (`0b0011` would be acceptable as well.)
+
+6. Briefly describe how tasks waiting on certain event groups specify which event groups they are waiting for.
 
 	they use the event group handle?
 
-6. Briefly describe how tasks can choose to handle what happened to event flags after the task awakens to some set of event flags in the event register being set.
+7. Briefly describe how tasks can choose to handle what happened to event flags after the task awakens to some set of event flags in the event register being set.
 
-	they can choose to set or clear bits
+	Using the `xEventGroupWaitBits()` function, you can state whether you would like the bits specified in the `uxBitsToWaitFor` field to be cleared on the return of the function. (This does *not* apply to when the function returns because of a timeout.) If this value is set to true, the bits specified in `uxBitsToWaitFor` will be cleared once this function unblocks. This functionality could be useful if you need to 
 
 ## System Design & Explanation
 
