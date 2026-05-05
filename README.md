@@ -4,7 +4,7 @@ Gavin Ruane &bullet; CPE 439-01 &bullet; 6 May 2026
 
 ## Demonstration Video
 
-My demonstration video is available on [YouTube](...) (if you would like to review it).
+My demonstration video is available on [YouTube](https://youtu.be/LKVTrLN-Tzg) (if you would like to review it).
 
 ## Questions
 
