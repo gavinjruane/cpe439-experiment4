@@ -4,9 +4,57 @@ Gavin Ruane &bullet; CPE 439-01 &bullet; 6 May 2026
 
 ## Demonstration Video
 
+My demonstration video is available on [YouTube](...) (if you would like to review it).
+
 ## Questions
 
+1. List the two advantages that event groups have over using semaphores for inter-process signaling.
+
+	lower resources, multiple events, multiple watchers
+
+2. Although event groups can handles multiple events, list the two main advantages that using event groups has over using a single semaphore.
+3. Briefly describe the two sets of event group functionality associated with the FreeRTOS API xEventGroupSyncFromISR().
+
+	that function does not exist, use the NON ISR one
+
+4. Briefly describe how event groups can be configured to use either OR or AND functions when waiting for event flags to be set in the event register.
+
+	Using **OR** with an event group
+
+5. Briefly describe how tasks waiting on certain event groups specify which event groups they are waiting for.
+
+	they use the event group handle?
+
+6. Briefly describe how tasks can choose to handle what happened to event flags after the task awakens to some set of event flags in the event register being set.
+
+	they can choose to set or clear bits
+
 ## System Design & Explanation
+
+### Four Tasks
+
+#### Default Task (Pre-Event Group Flow)
+In my implementation, the default task creates the event group and launches the four tasks needed to perform this experiment. Once it completes these tasks, it enters an infinite loop.
+
+#### Task 1
+Task 1 will immediately delay for 300 milliseconds and then set the first bit in the event group, leaving the event group to have a value of `0x01`.
+
+#### Task 2
+Task 2 immediately blocks waiting for Task 1 to set its bit. Once Task 1 sets the first bit, it unblocks and sets the *second* bit in the event group, leaving the event group to have a value of `0x03`.
+
+#### Task 3
+Task 3 immediately blocks waiting for Task 2 to set its bit. Once Task 2 sets the second bit, it unblocks and enters a spin poll loop waiting for a button press. Once it detects a button press, Task 3 sets the *third* bit in the event group, leaving the event group to have a value of `0x07`.
+
+#### Task 4
+Task 4 immediately blocks waiting for the bits set by Task 1, Task 2, and Task 3. Once *all* three previous tasks set their respective bits, Task 4 unblocks and displays a simple blinking pattern on the onboard LED.
+
+### Problems
+
+During lab time on Monday, May 4, I had mostly figured out a solution to the experiment, but I was having trouble getting my fourth task to run at all. In my design, I launch the four tasks needed for this experiment from the default task, and whichever task I scheduled last (or fourth) would *never* run. This did not have anything to do with blocking for bits in the event group.
+
+I briefly searched online why one task might never run in FreeRTOS, and I came across a forum post that suggested there might be some memory issues. I reduced the size of each task's stack to half of its default value, and that solved the issue!
+
+I am still confused as to why this issue would occur, especially because I really did not use much memory in this experiment. I believe that I have used more memory in bare-metal projects in the past, so my assumption would be that there is maybe a setting in FreeRTOS that I need to adjust. For reference, I am using the recommended NUCLEO board for this class (NUCLEO-L476RG), so I do not believe that I have constrained hardware or anything like that. Still, I am not satisfied with this solution! 
 
 ## Program Code
 
@@ -190,10 +238,9 @@ void FourthTask (void *argument) {
 		portMAX_DELAY
 	);
 
-	debug_blink(25);
-
-	led_status = true;
-	PA5_handle();
+	while (1) {
+		debug_blink(25);
+	}
 
 	while (1);
 }

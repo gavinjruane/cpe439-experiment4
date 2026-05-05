@@ -297,10 +297,9 @@ void FourthTask (void *argument) {
 		portMAX_DELAY
 	);
 
-	debug_blink(25);
-
-	led_status = true;
-	PA5_handle();
+	while (1) {
+		debug_blink(25);
+	}
 
 	while (1);
 }
