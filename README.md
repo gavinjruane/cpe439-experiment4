@@ -10,12 +10,15 @@ My demonstration video is available on [YouTube](...) (if you would like to revi
 
 1. List the two advantages that event groups have over using semaphores for inter-process signaling.
 
-	lower resources, multiple events, multiple watchers
+	While both semaphores and event groups have important uses, event groups are often superior for *signaling multiple events* as their name implies and *signaling events to multiple tasks*.
 
 2. Although event groups can handles multiple events, list the two main advantages that using event groups has over using a single semaphore.
-3. Briefly describe the two sets of event group functionality associated with the FreeRTOS API xEventGroupSyncFromISR().
 
-	that function does not exist, use the NON ISR one
+	Event groups use less resources than a single semaphore.
+
+3. Briefly describe the two sets of event group functionality associated with the FreeRTOS API ~~`xEventGroupSyncFromISR()`~~ `xEventGroupSync()`.
+
+	The function `xEventGroupSyncFromISR()` does not exist, so I will answer this question for `xEventGroupSync()`. 
 
 4. Briefly describe how event groups can be configured to use either OR or AND functions when waiting for event flags to be set in the event register.
 
@@ -23,13 +26,17 @@ My demonstration video is available on [YouTube](...) (if you would like to revi
 
 	As an example, consider the wait bits `0b0011`. If we were using an **AND** operation, we would need `0b0011` to be satisfied before the function would unblock. If we were using an **OR** operation, we would only need at least `0b0001` or `0b0010` to be set before continuing. (`0b0011` would be acceptable as well.)
 
-6. Briefly describe how tasks waiting on certain event groups specify which event groups they are waiting for.
+5. Briefly describe how tasks waiting on certain event groups specify which event groups they are waiting for.
 
-	they use the event group handle?
+	Each event group has its own handle that can be used by the event group API functions to specify which group they should operate on. For many systems, it might be useful to declare event group handles as global variables so that all tasks can access the handle and either set or wait for bits in the group; however, other systems might prefer to pass the handle as an argument to avoid other tasks changing an event group to which they should not have access.
 
-7. Briefly describe how tasks can choose to handle what happened to event flags after the task awakens to some set of event flags in the event register being set.
+	Once a task has the event group handle, it can call functions like `xEventGroupSetBits()` to update the event group or `xEventGroupWaitBits()` to check the status of the event group.
 
-	Using the `xEventGroupWaitBits()` function, you can state whether you would like the bits specified in the `uxBitsToWaitFor` field to be cleared on the return of the function. (This does *not* apply to when the function returns because of a timeout.) If this value is set to true, the bits specified in `uxBitsToWaitFor` will be cleared once this function unblocks. This functionality could be useful if you need to 
+8. Briefly describe how tasks can choose to handle what happened to event flags after the task awakens to some set of event flags in the event register being set.
+
+	Using the `xEventGroupWaitBits()` function, you can state whether you would like the bits specified in the `uxBitsToWaitFor` field to be cleared on the return of the function. (This does *not* apply to when the function returns because of a timeout.) If this value is set to true, the bits specified in `uxBitsToWaitFor` will be cleared once this function unblocks.
+
+	This functionality could be useful if you want only one task to be able to run once the bits are set, requiring other tasks dependent on the event group to wait until the bits are set again. It is also useful for ensuring that future updates to the event group are not changed by a stale event group.
 
 ## System Design & Explanation
 
